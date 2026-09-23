@@ -1,0 +1,106 @@
+---
+import '../styles.css';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PrintHive | Admin</title>
+  </head>
+
+  <body>
+    <header>
+      <nav>
+        <strong>PrintHive</strong>
+        <div>
+          <a href="/">Submit</a>
+          <a href="/queue">Queue</a>
+          <a href="/admin">Admin</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Admin Dashboard</h1>
+      <p class="muted">Manage submitted print requests.</p>
+
+      <section class="panel" id="jobs">
+        <p>Loading requests...</p>
+      </section>
+
+      <p id="message" role="status"></p>
+
+      <p class="note">
+       demo
+      </p>
+    </main>
+
+    <script>
+      const container = document.getElementById('jobs');
+      const message = document.getElementById('message');
+
+      if (container && message) {
+
+        const saved = JSON.parse(
+          localStorage.getItem('printhive-jobs') || '[]'
+        );
+
+        const jobs = Array.isArray(saved) ? saved : [];
+
+        function displayJobs() {
+          container.replaceChildren();
+
+          if (jobs.length === 0) {
+            container.textContent = 'No print requests yet.';
+            return;
+          }
+
+          jobs.forEach((job, index) => {
+
+            const item = document.createElement('div');
+            item.className = 'job';
+
+            const name = document.createElement('strong');
+            name.textContent = job.name;
+
+            const details = document.createElement('p');
+            details.textContent =
+              `${job.material} - ${job.status || 'Queued'}`;
+
+            item.append(name, details);
+
+            if (job.status === 'Queued') {
+
+              const button = document.createElement('button');
+              button.textContent = 'Cancel Request';
+
+              button.addEventListener('click', () => {
+
+                job.status = 'Cancelled';
+
+                localStorage.setItem(
+                  'printhive-jobs',
+                  JSON.stringify(jobs)
+                );
+
+                message.textContent = 'Request cancelled.';
+                message.className = 'notice';
+
+                displayJobs();
+
+              });
+
+              item.append(button);
+            }
+
+            container.append(item);
+          });
+        }
+
+        displayJobs();
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+---
+import '../styles.css';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PrintHive | Submit</title>
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Main navigation">
+        <strong>PrintHive</strong>
+        <div>
+           <a href="/" aria-current="page">Submit</a>
+           <a href="/queue">Queue</a>
+           <a href="/admin">Admin</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Submit a print request</h1>
+      <p class="muted">Choose an STL file and a material.</p>
+
+      <section class="panel">
+        <form id="print-form">
+          <label for="model">STL file</label>
+          <input id="model" type="file" accept=".stl" required />
+
+          <label for="material">Material</label>
+          <select id="material">
+            <option value="PLA">PLA</option>
+            <option value="PETG">PETG</option>
+          </select>
+
+          <button type="submit">Submit request</button>
+          <p id="message" role="status" aria-live="polite"></p>
+        </form>
+      </section>
+
+      <p class="note">demo</p>
+    </main>
+
+    <script>
+      const form = document.getElementById('print-form');
+      const fileInput = document.getElementById('model');
+      const materialInput = document.getElementById('material');
+      const message = document.getElementById('message');
+
+      if (form instanceof HTMLFormElement &&
+          fileInput instanceof HTMLInputElement &&
+          materialInput instanceof HTMLSelectElement &&
+          message instanceof HTMLElement) {
+        form.addEventListener('submit', (event) => {
+          event.preventDefault();
+          const file = fileInput.files?.[0];
+          message.className = 'error';
+
+          if (!file || !file.name.toLowerCase().endsWith('.stl')) {
+            message.textContent = 'Please choose an STL file.';
+            return;
+          }
+          if (file.size === 0 || file.size > 20 * 1024 * 1024) {
+            message.textContent = 'Choose a non-empty STL file under 20 MB.';
+            return;
+          }
+
+          try {
+            const saved = JSON.parse(localStorage.getItem('printhive-jobs') || '[]');
+            const jobs = Array.isArray(saved) ? saved : [];
+            jobs.push({
+              name: file.name,
+              material: materialInput.value,
+              date: new Date().toLocaleString(),
+              status: 'Queued'
+            });
+            localStorage.setItem('printhive-jobs', JSON.stringify(jobs));
+            form.reset();
+            message.className = 'notice';
+            message.textContent = 'Demo request saved! Open the Queue page to see it.';
+          } catch {
+            message.textContent = 'Could not save the request in this browser.';
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+---
+import '../styles.css';
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PrintHive | Queue</title>
+  </head>
+  <body>
+    <header>
+      <nav aria-label="Main navigation">
+        <strong>PrintHive</strong>
+        <div>
+          <a href="/">Submit</a>
+          <a href="/queue" aria-current="page">Queue</a>
+          <a href="/admin">Admin</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <h1>Print queue</h1>
+      <p class="muted">demo</p>
+      <section class="panel" id="jobs" aria-live="polite">
+        <p>Loading requests...</p>
+      </section>
+      <p class="note">test</p>
+    </main>
+
+    <script>
+      const container = document.getElementById('jobs');
+      if (container) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('printhive-jobs') || '[]');
+          const jobs = Array.isArray(saved) ? saved : [];
+          container.replaceChildren();
+
+          if (jobs.length === 0) {
+            container.textContent = 'No print requests yet. Go to Submit to add one.';
+          }
+
+          for (const job of jobs.slice().reverse()) {
+            const item = document.createElement('div');
+            item.className = 'job';
+            const name = document.createElement('strong');
+            name.textContent = String(job.name || 'Unnamed file');
+            const details = document.createElement('p');
+            details.textContent = `${job.material || 'Unknown material'} · ${job.status || 'Queued'}`;
+            const date = document.createElement('p');
+            date.className = 'muted';
+            date.textContent = String(job.date || '');
+            item.append(name, details, date);
+            container.append(item);
+          }
+        } catch {
+          container.textContent = 'Could not load demo requests from this browser.';
+        }
+      }
+    </script>
+  </body>
+</html>
